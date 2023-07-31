@@ -6,10 +6,11 @@ import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
-import android.provider.MediaStore.Images.Media.getBitmap
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -54,15 +55,16 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.lmkhant.notalator.R
-import com.lmkhant.notalator.ui.activity.EditPageActivity
-import com.lmkhant.notalator.ui.activity.PageDetailActivity
 import com.lmkhant.notalator.feature_note.domain.model.Collection
 import com.lmkhant.notalator.feature_note.viewmodel.CollectionViewModel
+import com.lmkhant.notalator.ui.activity.EditPageActivity
+import com.lmkhant.notalator.ui.activity.PageDetailActivity
 import com.lmkhant.notalator.ui.components.ModelTextFieldSheet
 import com.lmkhant.notalator.ui.components.ModelTextFieldSheetDelete
 import com.lmkhant.notalator.util.saveBitmap
 import java.util.Date
 
+@RequiresApi(Build.VERSION_CODES.P)
 @SuppressLint("UnrememberedMutableInteractionSource")
 @Composable
 fun CollectionSection(viewModel: CollectionViewModel = hiltViewModel()) {
@@ -108,6 +110,7 @@ fun CollectionSection(viewModel: CollectionViewModel = hiltViewModel()) {
 
 }
 
+@RequiresApi(Build.VERSION_CODES.P)
 @Composable
 fun BooksGrid(viewModel: CollectionViewModel, openBooksTitle: MutableState<Boolean>) {
 
@@ -135,21 +138,21 @@ fun BooksGrid(viewModel: CollectionViewModel, openBooksTitle: MutableState<Boole
 
                 selectedImageUri?.let { image ->
                     if (Build.VERSION.SDK_INT < 28) {
-                        bitmap.value = getBitmap(context.contentResolver, image)
+                        bitmap.value = MediaStore.Images
+                            .Media.getBitmap(context.contentResolver,image)
 
                     } else {
                         val source = ImageDecoder
-                            .createSource(context.contentResolver, image)
+                            .createSource(context.contentResolver,image)
                         bitmap.value = ImageDecoder.decodeBitmap(source)
                     }
-
                     if (bitmap.value != null) {
                         val imageUrl = saveBitmap(
                             context,
                             bitmap.value!!,
                             Bitmap.CompressFormat.PNG,
                             "image/png",
-                            "image"
+                            "images"
                         )
                         val updatedDocument =
                             it.copy(collectionImageUrl = imageUrl.toString())
